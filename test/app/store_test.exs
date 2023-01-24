@@ -116,6 +116,8 @@ defmodule App.StoreTest do
 
     test "get_bag/1 returns the bag with given id" do
       bag = bag_fixture()
+      bag = Store.update_volumes(bag)
+
       assert Store.get_bag(bag.id) == bag
     end
 
@@ -129,11 +131,14 @@ defmodule App.StoreTest do
 
     test "create_bag/1 with one cuboid and check payloadVolume" do
       bag = bag_fixture()
+      bag = Store.update_volumes(bag)
+
       assert bag.payloadVolume == @valid_attrs.payloadVolume
     end
 
     test "create_bag/1 with one cuboid and check availableVolume" do
       bag = bag_fixture()
+      bag = Store.update_volumes(bag)
       assert bag.availableVolume == @valid_attrs.availableVolume
     end
   end

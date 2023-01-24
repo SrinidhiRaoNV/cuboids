@@ -52,6 +52,21 @@ defmodule App.Store do
     |> Repo.insert()
   end
 
+  def update_cuboid(id, attrs) do
+    get_cuboid(id)
+    |> Cuboid.update_changeset(attrs)
+    |> Repo.update()
+  end
+
+  def delete_cuboid(id) do
+    cuboid = get_cuboid(id)
+    case cuboid do
+      nil -> {:error, :not_found}
+      cuboid -> cuboid |> Repo.delete()
+
+    end
+  end
+
   alias App.Store.Bag
 
   @doc """
@@ -78,7 +93,25 @@ defmodule App.Store do
       %Bag{}
 
   """
-  def get_bag(id), do: Repo.get(Bag, id) |> Repo.preload(:cuboids)
+  def get_bag(id), do: Repo.get(Bag, id) |> Repo.preload(:cuboids) |> update_volumes
+
+  def update_volumes(nil) do
+    :no_bag
+  end
+
+
+  def update_volumes(bag) do
+    payload_volume = bag.cuboids
+    |> Enum.reduce(0, fn(cuboid, acc) ->
+      volume = cuboid.width * cuboid.height * cuboid.depth
+      acc + volume end)
+
+    bag1 = Map.put(bag, :availableVolume, bag.volume - payload_volume)
+    Map.put(bag1, :payloadVolume, payload_volume)
+  end
+
+
+
 
   @doc """
   Creates a bag.

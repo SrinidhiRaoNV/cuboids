@@ -147,36 +147,76 @@ defmodule AppWeb.CuboidControllerTest do
 
   describe "update cuboid" do
     test "renders cuboid when data is valid", %{conn: conn} do
+
+      %{bag: bag, cuboids: cuboids} = fixtures()
+      cuboid = hd(cuboids)
+
+
+      conn =
+        post(conn, Routes.cuboid_path(conn, :create), %{
+          depth: 2,
+          height: 3,
+          width: 4,
+          bag_id: bag.id
+        })
+
+        cuboid_fetched = json_response(conn, 201)
+
+
       cuboid_to_update = %{
-        depth: 2,
+        depth: 1,
         height: 2,
         width: 2
       }
 
+      conn =
+        put(conn, Routes.cuboid_path(conn, :update, cuboid_fetched["id"]), cuboid_to_update)
+
       cuboid_updated = json_response(conn, 200)
-      assert cuboid_to_update.id == cuboid_updated["id"]
+      assert cuboid_fetched["id"] == cuboid_updated["id"]
       assert cuboid_to_update.height == cuboid_updated["height"]
       assert cuboid_to_update.width == cuboid_updated["width"]
       assert cuboid_to_update.depth == cuboid_updated["depth"]
     end
 
     test "renders cuboid when data is not valid", %{conn: conn} do
+
+      %{bag: bag, cuboids: cuboids} = fixtures()
+      cuboid = hd(cuboids)
+
       cuboid_to_update = %{
-        depth: 10,
+        depth: 100,
         height: 10,
         width: 10
       }
 
+      conn =
+        put(conn, Routes.cuboid_path(conn, :update, cuboid.id), cuboid_to_update)
       assert response(conn, 422) == "{\"errors\":{\"volume\":[\"Insufficient space in bag\"]}}"
     end
   end
 
   describe "delete cuboid" do
     test "renders cuboid when is valid", %{conn: conn} do
+
+      %{bag: bag, cuboids: cuboids} = fixtures()
+      cuboid = hd(cuboids)
+
+      conn =
+        delete(conn, Routes.cuboid_path(conn, :delete, cuboid.id))
+
       json_response(conn, 200)
     end
 
     test "renders cuboid when is invalid", %{conn: conn} do
+
+      %{bag: bag, cuboids: cuboids} = fixtures()
+      cuboid = hd(cuboids)
+
+      conn =
+        delete(conn, Routes.cuboid_path(conn, :delete, cuboid.id))
+        conn =
+          delete(conn, Routes.cuboid_path(conn, :delete, cuboid.id))
       json_response(conn, 404)
     end
   end
